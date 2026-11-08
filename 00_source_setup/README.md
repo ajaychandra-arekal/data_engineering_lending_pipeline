@@ -10,7 +10,7 @@ reads its data from MySQL, the way a real pipeline reads from a company's live d
 
 ```mermaid
 flowchart TD
-    A["loan.csv<br/>Kaggle Lending Club file<br/>2.26M loans, 145 columns"] --> B["Explore the data<br/>keep 33 columns<br/>keep loans issued from 2015<br/>1.79M loans"]
+    A["loan.csv<br/>Lending Data<br/>2.26M loans, 145 columns"] --> B["Explore the data<br/>keep 33 columns<br/>keep loans issued from 2015<br/>1.79M loans"]
     B --> C["Split by month and check<br/>48 months: 2015-01 to 2018-12"]
     C --> D["Load into MySQL<br/>one month at a time"]
     D --> E[("MySQL<br/>lending_db.loans<br/>1,794,323 loans")]
