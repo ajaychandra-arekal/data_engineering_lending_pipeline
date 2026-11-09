@@ -1,0 +1,15 @@
+# Secrets
+.env
+*.env
+
+# Python
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Data and run state
+*.csv
+*.parquet
+*.xlsx
+*_tracker.txt
+loans_dump.sql
