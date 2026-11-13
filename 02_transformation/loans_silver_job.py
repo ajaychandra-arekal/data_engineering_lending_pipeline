@@ -215,7 +215,7 @@ def fix_values(df):
 def add_derived(df, raw):
     """Add partition columns, risk categories, flags and a stable row key."""
     df["issue_month"] = df["issue_date"].dt.strftime("%Y-%m")
-    df["issue_year"] = df["issue_date"].dt.year
+    df["issue_year"] = df["issue_date"].dt.year.astype("int32")
 
     df["loan_status_category"] = df["loan_status"].map(STATUS_MAP)
     df["is_bad"] = df["loan_status_category"].isin(BAD_CATEGORIES).astype(int)
