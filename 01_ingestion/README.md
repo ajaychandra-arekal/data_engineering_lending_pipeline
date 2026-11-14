@@ -14,34 +14,22 @@ flowchart LR
     B -.->|move to next month| T
 ```
 
-## How it evolved
-
-| Version | How it ran | Output |
-|---|---|---|
-| 1 (retired) | Notebook on my laptop, local MySQL to S3, local tracker file | `raw/loans_YYYY-MM.csv` |
-| 2 (current) | Glue job in AWS, RDS MySQL to S3, tracker in S3 | `raw/loans_YYYY-MM.parquet` |
-
-Version 1 history was converted from CSV to Parquet, so all 48 months now sit in raw as Parquet.
-
 ## Steps
 
-1. **Source database on AWS**
-   The local MySQL table was copied to Amazon RDS MySQL (see `00_source_setup/rds_setup.sql`).
-
-2. **Private route for Glue**
+1. **Private route for Glue**
    - Security group `lending-mysql-sg`: port 3306 from my laptop only, plus a
      self-referencing rule so Glue can reach RDS.
    - S3 gateway endpoint, so Glue can reach S3 from inside the VPC (free).
    - Glue JDBC connection `lending-rds-conn` with the VPC, subnet and security group.
 
-3. **Extract job**
+2. **Extract job**
    `loans_extract_job.py` reads the tracker, works out the next month, queries
    RDS for it, writes Parquet to raw, and moves the tracker forward only after the
    write succeeds. If the month has no rows yet, it writes nothing.
 
-4. **Test new data arriving**
+3. **Test new data arriving**
    December 2018 was held back in RDS, the job was run, then the month was released
-   and the job was run again.
+   and the job was run again (see `00_source_setup/rds_setup.sql`).
 
 ## Test results
 
@@ -62,7 +50,7 @@ Version 1 history was converted from CSV to Parquet, so all 48 months now sit in
 The password is only stored in the Glue job parameters, not in this repository.
 In production it would live in AWS Secrets Manager.
 
-## Problems solved along the way
+## Problems solved
 
 | Problem | Cause | Fix |
 |---|---|---|
@@ -75,12 +63,10 @@ In production it would live in AWS Secrets Manager.
 
 | File | Purpose |
 |---|---|
-| `loans_extract_job.py` | Glue job: next month from RDS to S3 raw (version 2) |
-| `v1_local_mysql_to_s3.ipynb` | Version 1 notebook, kept as a record |
+| `loans_extract_job.py` | Glue job: next month from RDS to S3 raw |
 
-## Cost notes
+## Cost notess
 
-- RDS (db.t4g.micro) was deleted after testing, with a final snapshot `lending-mysql-final`
-  to restore from.
+- RDS (db.t4g.micro) is stopped or deleted when not in use, with a snapshot to restore from.
 - The S3 gateway endpoint is free. Interface endpoints (STS, Secrets Manager) were
   avoided because they charge per hour.
